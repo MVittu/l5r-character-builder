@@ -65,6 +65,11 @@
     render();
   }
 
+function setStateText(patch){
+  state = {...state, ...patch};
+  renderSummary(); // niente renderQuestions()
+}
+
   function resetDependentOnClan(){
     setState({
       familyId:"",
@@ -426,7 +431,7 @@ q2Body = UI.el("div",{},[
     const makeTextQ = (num, label, key, placeholder="")=>{
       const t = UI.text(placeholder);
       t.value = state[key] || "";
-      t.addEventListener("input", e=>setState({[key]: e.target.value}));
+      t.addEventListener("input", e=>setStateText({[key]: e.target.value}));
       return UI.el("div",{class:"q"},[
         UI.el("div",{class:"qnum", html:String(num)}),
         UI.el("div",{},[ UI.field(label, t) ])
@@ -439,7 +444,7 @@ q2Body = UI.el("div",{},[
       t.rows = 2;
       t.placeholder = "";
       t.value = state[textKey] || "";
-      t.addEventListener("input", e=>setState({[textKey]: e.target.value}));
+      t.addEventListener("input", e=>setStateText({[textKey]: e.target.value}));
 
       const picked = state[choiceKey] || choices[0].id;
       const radioWrap = UI.el("div",{class:"choice-group"},[
@@ -538,7 +543,7 @@ $q.appendChild(makeTextQ(5, "Chi è il suo signore e quali doveri ha nei suoi co
     $q.appendChild(makeTextQ(15, "Come reagisce alle situazioni stressanti?", "stressReaction"));
     const rel = UI.textarea("Clans/famiglie/organizzazioni/tradizioni…");
     rel.value = state.relations;
-    rel.addEventListener("input", e=>setState({relations:e.target.value}));
+    rel.addEventListener("input", e=>setStateText({relations:e.target.value}));
     $q.appendChild(UI.el("div",{class:"q"},[
       UI.el("div",{class:"qnum", html:"16"}),
       UI.el("div",{},[
