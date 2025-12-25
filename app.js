@@ -113,12 +113,19 @@ function schoolsForClan(clanId){
 
   function getGlory(){
     if(state.gloryOverride) return Number(state.gloryOverride)||0;
+
+    let base = null;
     if(state.clanId==="ronin"){
       const r=regions().find(x=>x.id===state.regionId);
-      return r?.glory ?? null;
+      base = r?.glory ?? null;
+    } else {
+      const f=db.families_or_regions.find(x=>x.type==="family" && x.id===state.familyId);
+      base = f?.glory ?? null;
     }
-    const f=db.families_or_regions.find(x=>x.type==="family" && x.id===state.familyId);
-    return f?.glory ?? null;
+
+    if(base==null) return null;
+    const bonus = (state.q7Reward==="glory") ? 5 : 0;
+    return base + bonus;
   }
 
   function renderSummary(){
@@ -139,6 +146,7 @@ function schoolsForClan(clanId){
       ["Onore (Q3)", state.honor || "—"],
       ["Gloria (Q2/Q1 Ronin)", glory ?? "—"],
       ["Status (Q1/Q2 Ronin)", status ?? "—"],
+      ["Abilità (incrementi)", formatSkillRanks(skillRanks)],
       ["Aria", rings.Aria],
       ["Acqua", rings.Acqua],
       ["Fuoco", rings.Fuoco],
@@ -210,7 +218,10 @@ function schoolsForClan(clanId){
       const regSel = UI.selectFrom(regions(), r=>r.id, r=>r.name, "Seleziona regione...");
       regSel.value = state.regionId;
       regSel.addEventListener("change", ()=>setState({regionId: regSel.value}));
-      q2Body = UI.field("Da quale regione proviene il personaggio? (Ronin)", regSel);
+      q2Body = UI.el("div",{},[
+        UI.field("Da quale regione proviene il personaggio? (Ronin)", regSel),
+        renderSkillPickList("q2SkillPicks", 2, "Incremento abilità (Q2)")
+      ]);
     } else {
       const fams=familiesForClan(state.clanId || "");
       const famSel = UI.selectFrom(fams, f=>f.id, f=>f.name, "Seleziona famiglia...");
@@ -235,6 +246,7 @@ function schoolsForClan(clanId){
 q2Body = UI.el("div",{},[
         UI.field("A quale famiglia appartiene il personaggio? (Samurai)", famSel),
         UI.field("Scelta anello famiglia (manuale, perché dipende dalla famiglia)", ringChoice),
+        renderSkillPickList("q2SkillPicks", 2, "Incremento abilità (Q2)"),
         UI.el("div",{class:"badge warn"},[
           document.createTextNode("Nota: alcune famiglie nel dataset sono 'best-effort'. Se vuoi, puoi ignorare il dato e scegliere manualmente qui.")
         ])
@@ -363,15 +375,64 @@ q2Body = UI.el("div",{},[
 
     $q.appendChild(makeTextQ(5, "Chi è il suo signore e quali doveri ha nei suoi confronti?", "lordAndDuties"));
     $q.appendChild(makeTextQ(6, "Cosa desidera ardentemente (Ninjō) e come ostacola il dovere?", "ninjo"));
-    $q.appendChild(makeTextQ(7, "Qual è il rapporto con il suo clan/comunità?", "clanRelation"));
-    $q.appendChild(makeTextQ(8, "Cosa pensa del Bushidō?", "bushidoView"));
+    (function(){
+      const base = makeTextQ(7, "Qual è il rapporto con il suo clan/comunità?", "clanRelation");
+      const body = base.children[1];
+      body.appendChild(renderRewardChoice("q7Reward", [
+        {id:"skill", label:"Incremento Abilità (1)"},
+        {id:"glory", label:"Incremento Gloria (+5)"}
+      ]));
+      const skillWrap = UI.el("div",{},[]);
+      const sel = skillSelect(state["q7SkillPick"], (v)=>setState({q7SkillPick: v}), "Seleziona abilità...");
+      skillWrap.appendChild(UI.field("Scegli abilità da aumentare", sel));
+      body.appendChild(skillWrap);
+      // show/hide
+      const sync = ()=>{ skillWrap.style.display = (state["q7Reward"]==="skill") ? "" : "none"; };
+      sync();
+      // re-sync on render: handled because render() recreates DOM
+      $q.appendChild(base);
+    })();
+    (function(){
+      const base = makeTextQ(8, "Cosa pensa del Bushidō?", "bushidoView");
+      const body = base.children[1];
+      body.appendChild(renderRewardChoice("q8Reward", [
+        {id:"skill", label:"Incremento Abilità (1)"},
+        {id:"honor", label:"Incremento Onore (+10)"}
+      ]));
+      const skillWrap = UI.el("div",{},[]);
+      const sel = skillSelect(state["q8SkillPick"], (v)=>setState({q8SkillPick: v}), "Seleziona abilità...");
+      skillWrap.appendChild(UI.field("Scegli abilità da aumentare", sel));
+      body.appendChild(skillWrap);
+      // show/hide
+      const sync = ()=>{ skillWrap.style.display = (state["q8Reward"]==="skill") ? "" : "none"; };
+      sync();
+      // re-sync on render: handled because render() recreates DOM
+      $q.appendChild(base);
+    })();
 
     // 9-13
     $q.appendChild(makeTextQ(9, "Qual è il traguardo più grande raggiunto finora?", "achievement"));
     $q.appendChild(makeTextQ(10, "Cosa è di maggiore ostacolo nella vita?", "obstacle"));
     $q.appendChild(makeTextQ(11, "Quale attività lo fa sentire in pace?", "peaceActivity"));
     $q.appendChild(makeTextQ(12, "Quale dubbio/paura/debolezza lo preoccupa di più?", "anxiety"));
-    $q.appendChild(makeTextQ(13, "Da chi ha imparato maggiormente?", "mentor"));
+    (function(){
+      const base = makeTextQ(13, "Da chi ha imparato maggiormente?", "mentor");
+      const body = base.children[1];
+      body.appendChild(UI.el("div",{class:"badge warn"},[document.createTextNode("Ricorda: qui hai sempre 1 Svantaggio (1).")]));
+      body.appendChild(renderRewardChoice("q13Reward", [
+        {id:"skill", label:"Incremento Abilità (1)"},
+        {id:"adv", label:"Vantaggio (1)"}
+      ]));
+      const skillWrap = UI.el("div",{});
+      const sel = skillSelect(state.q13SkillPick, (v)=>setState({q13SkillPick:v}), "Seleziona abilità...");
+      skillWrap.appendChild(UI.field("Scegli abilità da aumentare", sel));
+      body.appendChild(skillWrap);
+      const advNote = UI.el("div",{class:"badge warn"},[document.createTextNode("Vantaggio: per ora scegli manualmente (dataset vantaggi da popolare).")]);
+      body.appendChild(advNote);
+      skillWrap.style.display = (state.q13Reward==="skill") ? "" : "none";
+      advNote.style.display = (state.q13Reward==="adv") ? "" : "none";
+      $q.appendChild(base);
+    })();
 
     // 14-16
     $q.appendChild(makeTextQ(14, "Che cosa notano prima le persone che lo incontrano?", "firstImpression"));
