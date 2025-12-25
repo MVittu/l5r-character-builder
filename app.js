@@ -22,6 +22,7 @@
     schoolRing1: "",
     schoolRing2: "",
     honor: "",
+    schoolSkillPicks: [], // ✅ NUOVO: abilità di partenza scuola
     // Q4
     schoolDistinctionRing: "",
     // 5-8
@@ -65,10 +66,10 @@
     render();
   }
 
-function setStateText(patch){
-  state = {...state, ...patch};
-  renderSummary(); // niente renderQuestions()
-}
+  function setStateText(patch){
+    state = {...state, ...patch};
+    renderSummary(); // niente renderQuestions()
+  }
 
   function resetDependentOnClan(){
     setState({
@@ -81,6 +82,7 @@ function setStateText(patch){
       schoolRing2:"",
       schoolDistinctionRing:"",
       honor:"",
+      schoolSkillPicks: [] // ✅ reset anche abilità scuola
     });
   }
 
@@ -92,18 +94,27 @@ function setStateText(patch){
     return db.families_or_regions.filter(x=>x.type==="region");
   }
 
-
   function skills(){
     return db.skills || [];
   }
 
-  function makeSkillSelect(placeholder="Seleziona abilità..."){
-    const s = UI.selectFrom(skills(), sk=>sk.id, sk=>sk.name, placeholder);
+  // helper: name -> id (serve perché SCHOOL_STARTING_SKILLS usa nomi abilità)
+  function skillIdByName(name){
+    const s = skills().find(x => (x.name||"").trim() === (name||"").trim());
+    return s ? s.id : null;
+  }
+
+  function makeSkillSelect(placeholder="Seleziona abilità...", allowedIds=null){
+    const pool = Array.isArray(allowedIds) && allowedIds.length
+      ? skills().filter(sk => allowedIds.includes(sk.id))
+      : skills();
+    const s = UI.selectFrom(pool, sk=>sk.id, sk=>sk.name, placeholder);
     return s;
   }
 
   // Renders N skill picks bound to state[key] = array of skill ids (length N)
-  function renderSkillPicks(key, count, label){
+  // allowedIds (opzionale) limita le abilità selezionabili
+  function renderSkillPicks(key, count, label, allowedIds=null){
     const wrap = UI.el("div",{class:"section"},[]);
     const arr = Array.isArray(state[key]) ? state[key].slice() : Array(count).fill("");
     while(arr.length < count) arr.push("");
@@ -111,13 +122,18 @@ function setStateText(patch){
 
     const rows = UI.el("div",{class:"row"},[]);
     for(let i=0;i<count;i++){
-      const sel = makeSkillSelect(`${label} ${i+1}/${count}`);
+      const sel = makeSkillSelect(`${label} ${i+1}/${count}`, allowedIds);
       sel.value = arr[i] || "";
       sel.addEventListener("change", ()=>{
         const next = Array.isArray(state[key]) ? state[key].slice() : Array(count).fill("");
+        // normalizza lunghezza
+        while(next.length < count) next.push("");
+        while(next.length > count) next.pop();
         next[i] = sel.value;
+
         setState({[key]: next});
       });
+
       rows.appendChild(UI.el("div",{style:"flex:1; min-width:220px;"},[
         UI.field(`${label} (${i+1}/${count})`, sel)
       ]));
@@ -136,6 +152,8 @@ function setStateText(patch){
     };
     // Q2 (2 picks)
     (state.q2SkillPicks||[]).forEach(add);
+    // Q3 (abilita scuola)
+    (state.schoolSkillPicks||[]).forEach(add);
     // Q7/Q8/Q13 conditional picks
     if(state.q7Reward==="skill") add(state.q7Skill);
     if(state.q8Reward==="skill") add(state.q8Skill);
@@ -143,8 +161,6 @@ function setStateText(patch){
     return counts;
   }
 
-
-  
   function ringSelectFromList(rings, placeholder="Seleziona..."){
     const s=document.createElement("select");
     const o=document.createElement("option");
@@ -162,7 +178,7 @@ function setStateText(patch){
     return db.schools.find(s=>s.id===state.schoolId) || null;
   }
 
-function schoolsForClan(clanId){
+  function schoolsForClan(clanId){
     return db.schools.filter(s => (s.clanId||"") === clanId);
   }
 
@@ -199,7 +215,9 @@ function schoolsForClan(clanId){
     const honor = (honorBase==null ? null : honorBase + honorBonus);
 
     const skillCounts = countSkillIncrements();
-    const skillsSummary = skillCounts.size ? Array.from(skillCounts.entries()).map(([n,c])=>`${n} +${c}`).join(", ") : "—";
+    const skillsSummary = skillCounts.size
+      ? Array.from(skillCounts.entries()).map(([n,c])=>`${n} +${c}`).join(", ")
+      : "—";
 
     const items = [
       ["Clan/Tipo", clan ? clan.name : "—"],
@@ -258,8 +276,6 @@ function schoolsForClan(clanId){
       resetDependentOnClan();
     });
 
-
-    // Q1
     const baseStatus = getStatus();
     const baseGlory = getGlory();
     const q1 = UI.el("div",{class:"q"},[
@@ -292,7 +308,6 @@ function schoolsForClan(clanId){
       const famSel = UI.selectFrom(fams, f=>f.id, f=>f.name, "Seleziona famiglia...");
       famSel.value = state.familyId;
       famSel.addEventListener("change", ()=>{
-        const fam = fams.find(x=>x.id===famSel.value);
         setState({
           familyId: famSel.value,
           familyRingChoice: ""
@@ -308,7 +323,8 @@ function schoolsForClan(clanId){
       const ringChoice = ringSelectFromList(famRingOptions, "Seleziona anello (+1)...");
       ringChoice.value = state.familyRingChoice;
       ringChoice.addEventListener("change", ()=>setState({familyRingChoice: ringChoice.value}));
-q2Body = UI.el("div",{},[
+
+      q2Body = UI.el("div",{},[
         UI.field("A quale famiglia appartiene il personaggio? (Samurai)", famSel),
         UI.field("Scelta anello famiglia (manuale, perché dipende dalla famiglia)", ringChoice),
         renderSkillPicks("q2SkillPicks", 2, "Incremento abilità (Q2)"),
@@ -335,7 +351,13 @@ q2Body = UI.el("div",{},[
 
     schoolSel.addEventListener("change", ()=>{
       const selected = schoolOptions.find(s=>s.id===schoolSel.value) || null;
-      const patch = {schoolId: schoolSel.value, schoolDistinctionRing:""};
+
+      const patch = {
+        schoolId: schoolSel.value,
+        schoolDistinctionRing:"",
+        schoolSkillPicks: [] // ✅ reset abilità scuola quando cambi scuola
+      };
+
       if(selected){
         patch.honor = String(selected.honor ?? "");
         if(selected.ringBonuses?.mode === "fixed"){
@@ -350,10 +372,12 @@ q2Body = UI.el("div",{},[
         patch.schoolRing1 = "";
         patch.schoolRing2 = "";
       }
+
       setState(patch);
     });
 
     const school = getSelectedSchool();
+
     // Auto-allinea onore/anelli se il personaggio viene caricato da JSON
     if(school){
       const expectedHonor = String(school.honor ?? "");
@@ -386,7 +410,6 @@ q2Body = UI.el("div",{},[
 
       schoolRingRow.appendChild(UI.field("Scelta anelli scuola (2 distinti)", UI.el("div",{},[r1, r2])));
     } else if(school && fixedRings.length){
-      // visualizzazione read-only
       schoolRingRow.appendChild(UI.el("div",{class:"badge"},[
         `Anelli scuola: +1 ${fixedRings.join(" , +1 ")}`
       ]));
@@ -396,16 +419,40 @@ q2Body = UI.el("div",{},[
       `Onore scuola: ${school?.honor ?? "—"}`
     ]);
 
+    // ✅ Abilità di partenza scuola (vincolate)
+    let schoolSkillsBlock = null;
+    if(school && window.SCHOOL_STARTING_SKILLS){
+      const def = window.SCHOOL_STARTING_SKILLS[school.name];
+      if(def && Array.isArray(def.options)){
+        const allowedIds = def.options
+          .map(skillIdByName)
+          .filter(Boolean);
+
+        // normalizza lunghezza array nello state quando è selezionata una scuola
+        const count = Number(def.pick || 0);
+        if(count > 0){
+          const cur = Array.isArray(state.schoolSkillPicks) ? state.schoolSkillPicks : [];
+          if(cur.length !== count){
+            const next = cur.slice(0, count);
+            while(next.length < count) next.push("");
+            setState({ schoolSkillPicks: next });
+          }
+          schoolSkillsBlock = renderSkillPicks("schoolSkillPicks", count, "Abilità di partenza (Scuola)", allowedIds);
+        }
+      }
+    }
+
     $q.appendChild(UI.el("div",{class:"q"},[
       UI.el("div",{class:"qnum", html:"3"}),
       UI.el("div",{},[
         UI.field("Qual è la scuola/ordine del personaggio? (filtrata per clan)", schoolSel),
         schoolRingRow,
-        honorBadge
+        honorBadge,
+        ...(schoolSkillsBlock ? [schoolSkillsBlock] : [])
       ])
     ]));
 
-// Q4 - school distinction ring
+    // Q4 - school distinction ring
     const schoolQ4 = getSelectedSchool();
     let allowed = [];
     if(schoolQ4){
@@ -427,7 +474,7 @@ q2Body = UI.el("div",{},[
       ])
     ]));
 
-// Q5-8
+    // Q5-8
     const makeTextQ = (num, label, key, placeholder="")=>{
       const t = UI.text(placeholder);
       t.value = state[key] || "";
@@ -438,7 +485,6 @@ q2Body = UI.el("div",{},[
       ]);
     };
 
-    
     const makeTextQWithChoice = (num, label, textKey, choiceKey, choices, extraRender=null)=>{
       const t = document.createElement("textarea");
       t.rows = 2;
@@ -474,8 +520,10 @@ q2Body = UI.el("div",{},[
         ])
       ]);
     };
-$q.appendChild(makeTextQ(5, "Chi è il suo signore e quali doveri ha nei suoi confronti?", "lordAndDuties"));
+
+    $q.appendChild(makeTextQ(5, "Chi è il suo signore e quali doveri ha il personaggio nei suoi confronti? (scegliere giri)", "lordAndDuties"));
     $q.appendChild(makeTextQ(6, "Cosa desidera ardentemente (Ninjō) e come ostacola il dovere?", "ninjo"));
+
     $q.appendChild(makeTextQWithChoice(
       7,
       "Qual è il rapporto con il suo clan/comunità?",
@@ -493,6 +541,7 @@ $q.appendChild(makeTextQ(5, "Chi è il suo signore e quali doveri ha nei suoi co
         return UI.field("Incremento abilità (Q7)", sel);
       }
     ));
+
     $q.appendChild(makeTextQWithChoice(
       8,
       "Cosa pensa del Bushidō?",
@@ -516,6 +565,7 @@ $q.appendChild(makeTextQ(5, "Chi è il suo signore e quali doveri ha nei suoi co
     $q.appendChild(makeTextQ(10, "Cosa è di maggiore ostacolo nella vita?", "obstacle"));
     $q.appendChild(makeTextQ(11, "Quale attività lo fa sentire in pace?", "peaceActivity"));
     $q.appendChild(makeTextQ(12, "Quale dubbio/paura/debolezza lo preoccupa di più?", "anxiety"));
+
     $q.appendChild(makeTextQWithChoice(
       13,
       "Da chi ha imparato maggiormente?",
@@ -541,6 +591,7 @@ $q.appendChild(makeTextQ(5, "Chi è il suo signore e quali doveri ha nei suoi co
     // 14-16
     $q.appendChild(makeTextQ(14, "Che cosa notano prima le persone che lo incontrano?", "firstImpression"));
     $q.appendChild(makeTextQ(15, "Come reagisce alle situazioni stressanti?", "stressReaction"));
+
     const rel = UI.textarea("Clans/famiglie/organizzazioni/tradizioni…");
     rel.value = state.relations;
     rel.addEventListener("input", e=>setStateText({relations:e.target.value}));
