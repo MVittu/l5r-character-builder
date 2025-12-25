@@ -1,0 +1,16 @@
+window.DB = window.DB || {};
+window.DB.lookups = {
+  "rings": [
+    "Aria",
+    "Acqua",
+    "Fuoco",
+    "Terra",
+    "Vuoto"
+  ],
+  "derivedFormulas": {
+    "tenacia": "(Terra + Fuoco) * 2",
+    "compostezza": "(Terra + Acqua) * 2",
+    "concentrazione": "Aria + Fuoco",
+    "vigilanza": "ceil((Aria + Acqua) / 2)"
+  }
+};

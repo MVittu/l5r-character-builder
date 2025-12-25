@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>L5R 5e - Builder (20 Domande)</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>L5R 5e • Builder (Gioco delle 20 Domande)</h1>
+      <small>Samurai (Manuale Base) + Rōnin (Sentiero delle Onde) • solo front-end</small>
+    </div>
+    <div class="actions">
+      <button id="btnNew" class="danger">Nuovo</button>
+      <button id="btnSave" class="primary">Salva</button>
+      <button id="btnLoad">Carica</button>
+      <button id="btnExport">Esporta JSON</button>
+      <label class="badge warn" style="cursor:pointer;">
+        Importa JSON
+        <input id="fileImport" type="file" accept="application/json" style="display:none;"/>
+      </label>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+    <section class="card" aria-label="20 domande">
+      <h2>Le 20 domande</h2>
+
+      <div id="questions"></div>
+
+      <div class="section">
+        <div class="badge warn">
+          Nota: i file <span class="mono">data/*.json</span> sono pensati per essere completati/raffinati.
+          Per aprire anche da <span class="mono">file://</span>, la pagina usa <span class="mono">data/*.js</span> (stessi dati).
+        </div>
+      </div>
+    </section>
+
+    <aside class="card" aria-label="riepilogo">
+      <h2>Riepilogo (calcoli in tempo reale)</h2>
+      <div id="summary"></div>
+      <hr/>
+      <h2>Breakdown Anelli</h2>
+      <div id="breakdown"></div>
+    </aside>
+  </div>
+</main>
+
+<!-- Data (JS wrappers, compatibili con file://) -->
+<script src="lookups.js"></script>
+<script src="clans.js"></script>
+<script src="families_or_regions.js"></script>
+<script src="schools.js"></script>
+<script src="traits.js"></script>
+
+<!-- App -->
+<script src="rules.js"></script>
+<script src="storage.js"></script>
+<script src="ui.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
