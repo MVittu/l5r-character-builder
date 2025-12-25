@@ -143,3 +143,9 @@ button:hover{filter:brightness(1.08);}
 }
 .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
 hr{border:0;border-top:1px solid var(--line); margin:12px 0;}
+
+
+.choice-group{margin-top:8px;padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:12px;}
+.choice-group .label{font-size:12px;opacity:.85;margin-bottom:6px;}
+.radio-row{display:flex;gap:8px;align-items:center;margin:6px 0;}
+.radio{font-size:13px;}
