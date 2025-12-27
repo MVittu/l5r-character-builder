@@ -21,36 +21,6 @@ Per compatibilità con `file://` trovi anche gli equivalenti `*.js`.
 - **Scuole/Ordini** (*Manuale Base*): popolati (estrazione automatica; consigliata una verifica a campione).
 - **Tratti**: placeholder (da completare).
 
-## Pubblicazione su GitHub Pages (gratis)
-
-### 1) Metti i file su GitHub
-Se hai già una repo:
-```bash
-git clone https://github.com/<TUO-USERNAME>/<NOME-REPO>.git
-cd <NOME-REPO>
-
-# copia qui dentro i file di questa cartella (index.html, style.css, data/, src/)
-# oppure sostituisci quelli esistenti
-
-git add .
-git commit -m "Pubblica builder L5R"
-git push
-```
-
-### 2) Attiva GitHub Pages
-Su GitHub: **Settings → Pages**
-- **Source**: “Deploy from a branch”
-- **Branch**: `main`
-- **Folder**: `/ (root)`
-
-Dopo il deploy, il sito sarà:
-- `https://<TUO-USERNAME>.github.io/<NOME-REPO>/`
-
-> Non serve (e non conviene) impostare un **Custom domain** se non possiedi davvero un dominio: altrimenti vedrai errori DNS tipo `NXDOMAIN/InvalidDNSError`.
-
-### 3) Aggiorna il sito
-Ogni volta che fai `git push`, GitHub Pages ridistribuisce automaticamente.
-
 ## Calcoli
 
 - Anelli base 1
