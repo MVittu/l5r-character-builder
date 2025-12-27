@@ -1,26 +1,8 @@
 # L5R 5e – Character Builder (Gioco delle 20 Domande)
 
-Web app **statica** (solo front-end) per guidare la creazione personaggi con le **20 domande**:
+Web app **statica** per guidare la creazione personaggi con le **20 domande**:
 - *Manuale Base* (samurai)
 - *Sentiero delle Onde* (rōnin: Regione al posto della Famiglia)
-
-## Avvio in locale
-
-Apri `index.html` con un browser moderno.
-
-> Nota: per funzionare anche da `file://`, la pagina carica i dati da `data/*.js` (wrapper dei JSON).  
-> Se preferisci usare fetch sui JSON, avvia un server locale:
-```bash
-python -m http.server 8000
-# poi apri http://localhost:8000/
-```
-
-## Pubblicazione su GitHub Pages
-
-1. Crea un repo e carica questi file nella root.
-2. GitHub → **Settings → Pages**
-3. Source: **Deploy from a branch**
-4. Branch: **main** / folder: **/** (root)
 
 ## Dati (JSON)
 
