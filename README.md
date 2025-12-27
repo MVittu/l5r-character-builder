@@ -2,7 +2,7 @@
 
 Builder online per creare personaggi di **La Leggenda dei Cinque Anelli – 5ª Edizione** in **italiano**, a partire dal **1° grado**, seguendo il flusso del **“Gioco delle 20 Domande”**.
 
-Sito (GitHub Pages): `https://<username>.github.io/<repo>/`
+Sito (GitHub Pages): `[https://<username>.github.io/<repo>/](https://mvittu.github.io/l5r-character-builder/)`
 
 ---
 
