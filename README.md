@@ -12,7 +12,7 @@ Non avendo trovato un builder che soddisfacesse queste esigenze, l’obiettivo d
 
 - guidi l’utente passo-passo con le **20 domande**
 - lasci manuali solo i punti in cui le regole richiedono una **scelta** (liste, alternative “O”, selezioni vincolate)
-- calcoli automaticamente tutto il resto per un personaggio di **primo livello** (con riepilogo e breakdown)
+- calcoli automaticamente tutto il resto per un personaggio di **primo grado** della sua scuola (con riepilogo e breakdown)
 
 ---
 
