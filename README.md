@@ -41,23 +41,6 @@ Nota: il progetto è “no-backend”: nessun account, nessun server, nessuna pe
 
 ---
 
-## Pubblicazione su GitHub Pages
-
-Impostazione standard consigliata:
-
-1. Repository → **Settings** → **Pages**
-2. **Source**: Deploy from a branch
-3. **Branch**: `main`
-4. **Folder**: `/ (root)`
-
-Documentazione GitHub:
-- Configurare la sorgente di pubblicazione: https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
-
-Nota: se non possiedi un dominio, non impostare “Custom domain”. Per troubleshooting:
-- https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/troubleshooting-custom-domains-and-github-pages
-
----
-
 ## Struttura del progetto
 
 Per semplicità (e per gestire modifiche anche via interfaccia web GitHub), attualmente i file sono in **root**.
