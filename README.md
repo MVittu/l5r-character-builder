@@ -126,7 +126,7 @@ Documentazione: https://docs.github.com/en/communities/setting-up-your-project-f
 
 ---
 
-## Note legali (importanti)
+## Note legali
 
 Questo progetto è un’opera realizzata da fan e non è affiliata, sponsorizzata o approvata dai titolari dei diritti di **Legend of the Five Rings**.
 
