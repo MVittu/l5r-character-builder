@@ -22,7 +22,7 @@
     schoolRing1: "",
     schoolRing2: "",
     honor: "",
-    schoolSkillPicks: [], // ✅ NUOVO: abilità di partenza scuola
+    schoolSkillPicks: [], // NUOVO: abilità di partenza scuola
     // Q4
     schoolDistinctionRing: "",
     // 5-8
@@ -82,7 +82,7 @@
       schoolRing2:"",
       schoolDistinctionRing:"",
       honor:"",
-      schoolSkillPicks: [] // ✅ reset anche abilità scuola
+      schoolSkillPicks: [] // reset anche abilità scuola
     });
   }
 
@@ -355,7 +355,7 @@
       const patch = {
         schoolId: schoolSel.value,
         schoolDistinctionRing:"",
-        schoolSkillPicks: [] // ✅ reset abilità scuola quando cambi scuola
+        schoolSkillPicks: [] // reset abilità scuola quando cambi scuola
       };
 
       if(selected){
@@ -419,7 +419,7 @@
       `Onore scuola: ${school?.honor ?? "—"}`
     ]);
 
-    // ✅ Abilità di partenza scuola (vincolate)
+    // Abilità di partenza scuola (vincolate)
     let schoolSkillsBlock = null;
     if(school && window.SCHOOL_STARTING_SKILLS){
       const def = window.SCHOOL_STARTING_SKILLS[school.name];
